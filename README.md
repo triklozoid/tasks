@@ -16,6 +16,18 @@ postgres=# \d employee
 Indexes:
     "employee_pkey" PRIMARY KEY, btree (id)
 ```
+Если нам нужна информация о всех сотрудниках, имеющих максимальную зарплату в отделе(в случае, когда она одинаковая):
+```
+SELECT m.name, m.department, t.mx FROM (SELECT department, max(salary) as mx from employee GROUP BY department) t JOIN employee m on m.department = t.department and t.mx = m.salary;'
+```
+Если достаточно информации о любом из сотрудников с максимальной зарплатой:
+```
+SELECT DISTINCT ON (department) department, name, salary from employee ORDER BY department, salary DESC;
+```
+Запустить запросы, посмотреть результ:
+```
+make sql
+```
 
 
 ### Задача 2: Smashing Wallpaper Downloader
