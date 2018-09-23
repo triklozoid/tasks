@@ -18,7 +18,7 @@ Indexes:
 ```
 Если нам нужна информация о всех сотрудниках, имеющих максимальную зарплату в отделе(в случае, когда она одинаковая):
 ```
-SELECT m.name, m.department, t.mx FROM (SELECT department, max(salary) as mx from employee GROUP BY department) t JOIN employee m on m.department = t.department and t.mx = m.salary;'
+SELECT m.name, m.department, t.mx FROM (SELECT department, max(salary) as mx from employee GROUP BY department) t JOIN employee m on m.department = t.department and t.mx = m.salary;
 ```
 Если достаточно информации о любом из сотрудников с максимальной зарплатой:
 ```
