@@ -23,7 +23,7 @@ BASE_URL = 'https://www.smashingmagazine.com/{}/{:02}/desktop-wallpaper-calendar
 
 def validate_date(value):
     try:
-        datetime.strptime(value, '%m%Y')
+        value = datetime.strptime(value, '%m%Y')
     except ValueError:
         raise argparse.ArgumentTypeError(
             'Invalid date value: "{}"'.format(value))
@@ -38,41 +38,32 @@ def validate_resolution(value):
     return value
 
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "date",
-        help='Wallpapers date in MMYYYY format, e.g. "082018"',
-        type=validate_date)
-    parser.add_argument(
-        "resolution",
-        help='Wallpaper resolution, available: {}'.format(
-            ', '.join(RESOLUTIONS)),
-        type=validate_resolution)
-    args = parser.parse_args()
-
-    date = datetime.strptime(args.date, '%m%Y')
+def build_url(date):
     previous_month_date = date - timedelta(days=1)
-
     url = BASE_URL.format(previous_month_date.year, previous_month_date.month,
                           date.strftime('%B').lower(), date.year)
+    return url
+
+
+def getwallpapers(date, resolution):
+    url = build_url(date)
 
     if not os.path.exists(WALLPAPERS_PATH):
         os.makedirs(WALLPAPERS_PATH)
 
     response = requests.get(url)
     if response.status_code == 404:
-        print('Can not find wallpapers page for date {}'.format(args.date))
+        print('Can not find wallpapers page for date {}'.format(date.strftime('%m%Y')))
         sys.exit(1)
     if response.status_code != 200:
-        print('Unknown error loading wallpapers list {}'.format(args.date))
+        print('Unknown error loading wallpapers list {}'.format(date.strftime('%m%Y')))
         sys.exit(1)
 
     sel = Selector(text=response.text)
     for element in sel.css('#article__content > div > ul > li > a'):
         element_resolution = element.css('::text').get()
 
-        if element_resolution == args.resolution:
+        if element_resolution == resolution:
             img_url = element.attrib['href']
             file_path = '{}/{}'.format(WALLPAPERS_PATH,
                                        urlparse(img_url).path.split('/')[-1])
@@ -89,4 +80,15 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "date",
+        help='Wallpapers date in MMYYYY format, e.g. "082018"',
+        type=validate_date)
+    parser.add_argument(
+        "resolution",
+        help='Wallpaper resolution, available: {}'.format(
+            ', '.join(RESOLUTIONS)),
+        type=validate_resolution)
+    args = parser.parse_args()
+    getwallpapers(args.date, args.resolution)

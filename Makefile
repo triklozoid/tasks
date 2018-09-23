@@ -9,3 +9,6 @@ sql:
 getwallpapers_env:
 	cd getwallpapers && docker build -t getwallpapers .
 	docker run -it --rm --name gwp -v $(shell pwd)/getwallpapers:/app -w /app getwallpapers /bin/bash
+getwallpapers_test:
+	cd getwallpapers && docker build -t getwallpapers .
+	docker run -it --rm --name gwp -v $(shell pwd)/getwallpapers:/app -w /app getwallpapers py.test -v
